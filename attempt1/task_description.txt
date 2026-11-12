@@ -2,4 +2,4 @@ Chartroom's line and scatter charts should accept ISO dates in the x column, eit
 
 This matters because anything measured over time, like daily sales or visitor counts, doesn't chart properly today. The line chart doesn't fail. It spaces every point evenly and keeps the rows in file order, so it quietly draws a misleading chart. The scatter chart can't read dates at all and stops with an error. A wrong chart that looks fine is worse than an error, because nobody knows to question it.
 
-Grouping by day, week or month and other date formats such as 01/02/2026 are out of scope. Charts made from non-date data should come out exactly the same as before, bar, pie and histogram charts should be unchanged, and the existing tests should still pass.
+Grouping by day, week or month and other date formats such as 01/02/2026 or 20260101 are out of scope. Columns of plain numbers, such as years like 2024 and 2025, must not be treated as dates. Charts made from non-date data should come out exactly the same as before, bar, pie and histogram charts should be unchanged, and the existing tests should still pass.

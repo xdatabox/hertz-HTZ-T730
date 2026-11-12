@@ -77,6 +77,20 @@ Feb,120
 Mar,115
 EOF
 
+cat > check/years.csv <<'EOF'
+year,sales
+2024,100
+2025,120
+2026,115
+EOF
+
+cat > check/ids.csv <<'EOF'
+id,value
+20260101,10
+20260102,20
+20260301,15
+EOF
+
 Real time spacing:
 
 chartroom line check/dates.csv -x date -y visitors -o check/line.png
@@ -128,16 +142,22 @@ This should print layout ok. Then run:
 
 chartroom bar check/names.csv -o check/names-after.png
 chartroom line check/months.csv -x month -y sales -o check/months-after.png
+chartroom line check/years.csv -x year -y sales -o check/years-after.png
+chartroom line check/ids.csv -x id -y value -o check/ids-after.png
 REPO=$(pwd)
 cd ../chartroom-before
 python -c "import chartroom.charts; print(chartroom.charts.__file__)"
 python -m chartroom bar "$REPO/check/names.csv" -o "$REPO/check/names-before.png"
 python -m chartroom line "$REPO/check/months.csv" -x month -y sales -o "$REPO/check/months-before.png"
+python -m chartroom line "$REPO/check/years.csv" -x year -y sales -o "$REPO/check/years-before.png"
+python -m chartroom line "$REPO/check/ids.csv" -x id -y value -o "$REPO/check/ids-before.png"
 cd "$REPO"
 cmp check/names-before.png check/names-after.png && echo "bar: identical"
 cmp check/months-before.png check/months-after.png && echo "line: identical"
+cmp check/years-before.png check/years-after.png && echo "years: identical"
+cmp check/ids-before.png check/ids-after.png && echo "ids: identical"
 
-The python -c line must print a path inside chartroom-before, ending in chartroom-before/chartroom/charts.py. If it prints a path inside the main repo, the before charts are coming from the new code, so stop and fix the layout before trusting the comparison. Both cmp lines should print identical. The month names Jan, Feb, Mar must not be treated as dates.
+The python -c line must print a path inside chartroom-before, ending in chartroom-before/chartroom/charts.py. If it prints a path inside the main repo, the before charts are coming from the new code, so stop and fix the layout before trusting the comparison. All four cmp lines should print identical. The month names Jan, Feb, Mar, the years 2024 to 2026 and 8-digit numbers like 20260101 must not be treated as dates.
 
 Things that can look like a pass but aren't:
 

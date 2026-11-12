@@ -26,8 +26,16 @@ To run the tests:
     pip install -e . --group dev
     python -m pytest
 
-I went through the repo's issues and pull requests and didn't find a date fix. There are no issues filed, and searching for "date" finds nothing. The 3 open PRs are about axis limits (#8), DuckDB support (#7) and radar charts (#6), and none of them mention dates. The 5 closed PRs are Simon's own early work (first version, alt text, styles) and none touch dates.
+I went through the repo's issues and pull requests and didn't find a date fix. There are no issues filed, and searching for "date" finds nothing. The 4 open PRs are about a clean error for an unknown --style (#9), axis limits (#8), DuckDB support (#7) and radar charts (#6), and none of them add date support. The 5 closed PRs are Simon's own early work (first version, alt text, styles) and none touch dates.
 
 What I'm asking for is ISO dates (like 2026-01-01, or 2026-01-01T09:30 with a time) on the x-axis of line and scatter charts, placed by real time so the gaps between points are true to the data, with readable tick labels that don't overlap. It should also plot rows that are out of order in date order, give a clear error that names the bad value when a date cell is blank or invalid, and the automatic alt text should say what date range the chart covers. Grouping by month and handling messy formats like 01/02/2026 are out of scope for this. I expect changes mainly in io.py and charts.py, maybe a small new helper module, plus new tests and a README update. Charts made from non-date data should come out exactly the same as before, and the existing tests should still pass.
 
 Why I want it: most of what I'd want to chart quickly is something over time, like daily counts or monthly totals. When I tried it, the line chart didn't fail, it just quietly drew a misleading picture, with points a day apart and points a month apart sitting the same distance apart. A chart that's wrong but looks fine is worse than an error, so I'd like line and scatter charts to understand dates properly.
+
+Things to watch for:
+
+How a column gets recognised as dates is up to the model, but it must not pick up columns that aren't dates. A year column like 2024, 2025, 2026, a column of 8-digit numbers like 20260101, and plain numbers like 1, 2, 3 should all chart exactly as they do today. One trap: on Python 3.11 and later, date.fromisoformat("20260101") is accepted and returns 2026-01-01, so a check built only on fromisoformat would quietly turn a column of IDs into dates. I only want the dashed forms (2026-01-01 and 2026-01-01T09:30).
+
+Time zone offsets like 2026-01-01T09:30Z aren't part of this. If the model does handle them, mixing them with plain dates should still end in a clean error and not a Python traceback.
+
+The README's CLI reference and style list are generated with cog. On the untouched code, cog --check README.md already fails with matplotlib 3.11, because the style list is missing petroff6 and petroff8. If the model regenerates the README, those two extra lines are expected and aren't a mistake.
