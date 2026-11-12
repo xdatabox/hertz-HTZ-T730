@@ -1,0 +1,17 @@
+# Attempt 2 details: one "key: value" per line. Lines starting with # are ignored.
+# The other files in this folder are pasted into the platform exactly as they are; this one is not.
+
+# Your task code, as in this repository's name (for example HTZ-T017)
+task_code: HTZ-T000
+
+# The conversation you are submitting: the taskId in the platform's address bar, shown again when you finish
+conversation_id: EXAMPLE-conv-0000000000
+
+# true if the first message you sent differs from attempt1/first_message.txt (then also fill in change_reason.txt)
+first_message_changed: false
+
+# completed or gave_up
+outcome: completed
+
+# Optional: how many responses you flagged
+flags_count: 3

@@ -1,0 +1,152 @@
+How to check the chartroom date work
+
+All commands are for a bash shell and run from the root of the repo.
+
+Set up and run the tests first. Create and activate a virtual environment, and keep it active for every command below, including the ones you run in ../chartroom-before. All the existing tests should pass, along with the new ones.
+
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e . --group dev
+python -m pytest
+
+Then make some small test files. Start from an empty check folder, so an image left over from an earlier run can't be mistaken for a new one:
+
+rm -rf check && mkdir check
+
+cat > check/dates.csv <<'EOF'
+date,visitors
+2026-01-01,120
+2026-01-02,135
+2026-03-01,240
+2026-08-01,365
+EOF
+
+cat > check/unsorted.csv <<'EOF'
+date,visitors
+2026-03-01,240
+2026-01-01,120
+2026-08-01,365
+2026-01-02,135
+EOF
+
+cat > check/invalid.csv <<'EOF'
+date,visitors
+2026-01-01,120
+not-a-date,135
+2026-03-01,240
+EOF
+
+cat > check/blank.csv <<'EOF'
+date,visitors
+2026-01-01,120
+,135
+2026-03-01,240
+EOF
+
+cat > check/times.csv <<'EOF'
+time,requests
+2026-01-01T09:30,12
+2026-01-01T10:00,18
+2026-01-01T13:45,40
+EOF
+
+cat > check/range.csv <<'EOF'
+date,visitors
+2026-01-01,200
+2026-01-08,150
+2026-02-01,100
+2026-03-01,180
+2026-04-01,300
+2026-05-01,250
+2026-06-01,220
+2026-07-01,210
+EOF
+
+cat > check/names.csv <<'EOF'
+name,value
+alice,10
+bob,20
+charlie,15
+EOF
+
+cat > check/months.csv <<'EOF'
+month,sales
+Jan,100
+Feb,120
+Mar,115
+EOF
+
+Real time spacing:
+
+chartroom line check/dates.csv -x date -y visitors -o check/line.png
+
+Open check/line.png. The gap between Jan 2 and Mar 1 should be clearly wider than the gap between Jan 1 and Jan 2. The gap between Mar 1 and Aug 1 should be wider still. The date labels along the bottom should not overlap.
+
+Scatter with dates:
+
+chartroom scatter check/dates.csv -x date -y visitors -o check/scatter.png
+
+This should print the path to the PNG with no error. Open it and check the points are spaced by date the same way as the line chart.
+
+Rows out of order:
+
+chartroom line check/unsorted.csv -x date -y visitors -o check/unsorted.png
+
+Open check/unsorted.png. The dates should run left to right in date order, from Jan 1 to Aug 1. The line should go steadily up from 120 to 365 without doubling back.
+
+Blank and invalid dates:
+
+chartroom line check/invalid.csv -x date -y visitors -o check/invalid.png; echo "exit=$?"
+chartroom line check/blank.csv -x date -y visitors -o check/blank.png; echo "exit=$?"
+
+The first command should print an error that names not-a-date. The second should print an error that makes it clear a date is blank or missing. Both should end with a non-zero exit code. Neither should print a Python traceback.
+
+Dates with a time:
+
+chartroom line check/times.csv -x time -y requests -o check/times.png
+
+This should work without an error. Open the image and check that 09:30 and 10:00 are close together and 13:45 is much further along.
+
+Alt text:
+
+chartroom line check/range.csv -x date -y visitors -o check/range.png -f alt
+chartroom line check/range.csv -x date -y visitors -o check/range.png -f json
+
+Both should mention the start and end of the date range, 2026-01-01 and 2026-07-01. Before this change the alt text only names 2026-02-01 and 2026-04-01, the dates of the lowest and highest values.
+
+Non-date charts unchanged. This renders the same charts with the original code and compares the files byte for byte.
+
+First put the original, unchanged chartroom code in ../chartroom-before, with pyproject.toml and the chartroom package directly inside that folder, not inside a nested chartroom folder. The original chartroom.zip has a top-level chartroom folder, so don't unzip it straight into ../chartroom-before. Unpack it somewhere else and move that folder into place. Replace /path/to/chartroom.zip with where the original zip is:
+
+rm -rf /tmp/chartroom-orig ../chartroom-before && mkdir /tmp/chartroom-orig
+unzip -q /path/to/chartroom.zip -d /tmp/chartroom-orig
+mv /tmp/chartroom-orig/chartroom ../chartroom-before
+test -f ../chartroom-before/pyproject.toml && test -d ../chartroom-before/chartroom && echo "layout ok"
+
+This should print layout ok. Then run:
+
+chartroom bar check/names.csv -o check/names-after.png
+chartroom line check/months.csv -x month -y sales -o check/months-after.png
+REPO=$(pwd)
+cd ../chartroom-before
+python -c "import chartroom.charts; print(chartroom.charts.__file__)"
+python -m chartroom bar "$REPO/check/names.csv" -o "$REPO/check/names-before.png"
+python -m chartroom line "$REPO/check/months.csv" -x month -y sales -o "$REPO/check/months-before.png"
+cd "$REPO"
+cmp check/names-before.png check/names-after.png && echo "bar: identical"
+cmp check/months-before.png check/months-after.png && echo "line: identical"
+
+The python -c line must print a path inside chartroom-before, ending in chartroom-before/chartroom/charts.py. If it prints a path inside the main repo, the before charts are coming from the new code, so stop and fix the layout before trusting the comparison. Both cmp lines should print identical. The month names Jan, Feb, Mar must not be treated as dates.
+
+Things that can look like a pass but aren't:
+
+Chartroom writes a PNG and prints its path even when the axis is wrong, so open each image rather than trusting that a file was created.
+
+Passing tests don't prove much on their own. Read the new tests and check that they test the spacing and the order of the points, not just that a file was written or the command exited with 0.
+
+The alt text check has to use range.csv. With six rows or fewer the alt text lists every point, so it shows the first and last dates even without any fix.
+
+The "before" charts must be made from inside the chartroom-before folder, and that folder must hold pyproject.toml and the chartroom package directly. Run from the main repo, or from a folder where the code sits one level deeper in a nested chartroom folder, python -m chartroom picks up the new code and the comparison prints identical even when the charts changed. The import path check above catches this.
+
+Where to look: chartroom/io.py and chartroom/charts.py for the main changes, any new helper module next to them, the new tests in tests/, and the README for documentation of the date support.

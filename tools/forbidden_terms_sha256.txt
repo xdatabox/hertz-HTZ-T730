@@ -1,0 +1,5 @@
+# One sha256 hex per line: the lowercase word that must never appear in a submission.
+# Hashes, not words, so this file itself never contains the terms.
+# Add a term: python3 -c "import hashlib,sys; print(hashlib.sha256(sys.argv[1].lower().encode()).hexdigest())" WORD
+# petra
+8a48abbd5535a6de051dd167111e33abe996ddc7091aeac8808ae2c335d505ce

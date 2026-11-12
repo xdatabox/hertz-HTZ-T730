@@ -1,0 +1,7 @@
+From the repository root with the dev extras installed:
+
+- `pytest tests/test_cli.py -k atomic` passes and includes new tests for insert and upsert where a bad row appears after several good rows. With --atomic the table has zero rows (or does not exist, if the import created it) after the failure; without --atomic the earlier good rows are present as before.
+- `pytest tests/` is green.
+- `sqlite-utils insert --help` and `sqlite-utils upsert --help` show the new flag.
+- `docs/cli.rst` documents --atomic and `python -m cogapp --check docs/*.rst` passes.
+- `echo '[{"id":1},{"id":"x"}]' | sqlite-utils insert demo.db t - --pk id --atomic` exits non-zero and `sqlite-utils tables demo.db` does not list t.

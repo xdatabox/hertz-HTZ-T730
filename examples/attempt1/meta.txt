@@ -1,0 +1,19 @@
+# Attempt 1 details: one "key: value" per line. Lines starting with # are ignored.
+# The other files in this folder are pasted into the platform exactly as they are; this one is not.
+
+# Your task code, as in this repository's name (for example HTZ-T017)
+task_code: HTZ-T000
+
+# t2 = contained feature (3-7 h); t3 = cross-cutting change (7-14 h); t4 = large refactor or extraction (15 h+)
+tier: t3
+
+# live = you watch every response as it arrives; away = you let the model run long and check in
+watching_mode: live
+
+# Your codebase pull request (into the codebase branch) and the full 40-character commit the zip is built from
+codebase_pr_url: https://github.com/Handshake-project-hertz/hertz-HTZ-T000/pull/1
+codebase_commit_sha: e0b8ccfae165db4a0921bc5ca3475d6d77ae5518
+
+# own = your own code you may share; oss_used = an open-source repository you use or contribute to;
+# oss_other = an open-source repository you do not normally work with
+codebase_source: oss_used

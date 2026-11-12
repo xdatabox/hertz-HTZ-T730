@@ -1,0 +1,1 @@
+Unchanged public source of the Apache 2.0 licensed simonw/chartroom repository on GitHub at commit 8812afc02e1310e9eddbb56508b06005ff2c0ed5, built with git archive.

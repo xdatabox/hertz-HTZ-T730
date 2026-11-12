@@ -1,0 +1,7 @@
+Completed.
+
+Files to look at: sqlite_utils/cli.py (the new --atomic option on insert and upsert and the transaction wrapper), tests/test_cli.py (six new tests, names start with test_atomic_), docs/cli.rst.
+
+Commands I ran at the end: `pytest tests/` (all green), `python -m cogapp --check docs/*.rst`, and the stdin example from my brief, which exits 1 and leaves no table.
+
+The model initially made --atomic silently override --batch-size; I asked for an explicit error on the combination and that is what shipped.

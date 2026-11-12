@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Hertz attempt1",
+  "description": "The task brief a fellow submits before starting the conversation: the attempt1/ folder at the root of the task repository, one plain-text file per field plus meta.txt for the short values (tools/paperwork.py maps them onto this shape). The older attempt1.json with this exact shape is still accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_code",
+    "task_description",
+    "how_to_judge_completion",
+    "reviewer_notes",
+    "codebase",
+    "first_message",
+    "tier",
+    "watching_mode"
+  ],
+  "properties": {
+    "task_code": {
+      "type": "string",
+      "pattern": "^HTZ-T[0-9]{3}$",
+      "description": "The code shown in your task title. Must match this repository's name (hertz-<task_code>)."
+    },
+    "task_description": {
+      "type": "string",
+      "minLength": 200,
+      "description": "What you are trying to get done, for a reviewer who was not there. Copy this into the platform task form."
+    },
+    "how_to_judge_completion": {
+      "type": "string",
+      "minLength": 100,
+      "description": "What a correct result looks like: commands to run, behaviour to check. Copy this into the platform task form."
+    },
+    "reviewer_notes": {
+      "type": "string",
+      "description": "Anything else that helps assess the outcome. May be empty. Copy this into the platform task form."
+    },
+    "codebase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr_url",
+        "commit_sha",
+        "source"
+      ],
+      "properties": {
+        "pr_url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[Hh]andshake-project-hertz/hertz-HTZ-T[0-9]{3}/pull/[0-9]+$",
+          "description": "Your codebase pull request in this task repository (into the codebase branch). The zip you mount comes from this branch."
+        },
+        "commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "Full 40-character commit on that pull request that the zip is taken from (normally its latest commit)."
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "own",
+            "oss_used",
+            "oss_other"
+          ],
+          "description": "own = my own code I am allowed to share; oss_used = open-source repository I use or contribute to; oss_other = open-source repository I do not normally work with."
+        }
+      }
+    },
+    "first_message": {
+      "type": "string",
+      "minLength": 100,
+      "maxLength": 3000,
+      "description": "The first message you will send to the model, exactly. One paragraph is the target."
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "t2",
+        "t3",
+        "t4"
+      ],
+      "description": "t2 = contained feature (3-7 h); t3 = cross-cutting change (7-14 h); t4 = large refactor or extraction (15 h+)."
+    },
+    "watching_mode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "away"
+      ],
+      "description": "live = you watch every response as it arrives; away = you let the model run long and check in. Affects how proactivity is judged."
+    },
+    "mount_source": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "One line: what you will type when the platform asks where the mounted file came from (the real origin of the code; the client reads it). attempt1/mount_source.txt; absent in the older attempt1.json."
+    }
+  }
+}

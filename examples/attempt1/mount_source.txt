@@ -1,0 +1,1 @@
+Unchanged public source of the Apache 2.0 licensed simonw/sqlite-utils repository on GitHub at commit 85b1be10c81d9dd3567e36faf8dd411e4a8789bd, version 4.2.1, built with git archive.

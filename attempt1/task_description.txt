@@ -1,0 +1,5 @@
+Chartroom's line and scatter charts should accept ISO dates in the x column, either plain dates like 2026-01-01 or dates with a time like 2026-01-01T09:30. Points should be placed by real time, so a one-day gap looks smaller than a one-month gap, with tick labels that don't overlap. Rows that come in out of order should be plotted in date order. A blank or invalid date should stop the chart with a clear error that names the bad value, and the automatic alt text should say what date range the chart covers.
+
+This matters because anything measured over time, like daily sales or visitor counts, doesn't chart properly today. The line chart doesn't fail. It spaces every point evenly and keeps the rows in file order, so it quietly draws a misleading chart. The scatter chart can't read dates at all and stops with an error. A wrong chart that looks fine is worse than an error, because nobody knows to question it.
+
+Grouping by day, week or month and other date formats such as 01/02/2026 are out of scope. Charts made from non-date data should come out exactly the same as before, bar, pie and histogram charts should be unchanged, and the existing tests should still pass.

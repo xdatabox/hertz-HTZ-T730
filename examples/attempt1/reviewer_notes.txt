@@ -1,0 +1,1 @@
+I care about the interaction with --batch-size: with --atomic, batch commits must not happen (either error out on the combination or make --atomic win, and say which in the docs). Watch for the model changing default behaviour or the streaming path while adding this.

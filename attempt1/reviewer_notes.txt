@@ -1,0 +1,33 @@
+Chartroom: making dates work on the x-axis
+
+Chartroom is a small command-line tool that turns CSV, TSV, JSON or SQLite query results into PNG charts with matplotlib. You give it a file or pipe data in, pick a chart type (bar, line, scatter, pie or histogram), and it writes out an image.
+
+The code is small. chartroom/io.py loads the data and works out which columns to use for x and y, chartroom/charts.py draws the charts (one render function per chart type), chartroom/cli.py has the commands and options, and the tests are in tests/.
+
+The problem is that dates don't really work, even though the help text for the line command uses "-x date" as its example. CSV values all load as text, because io.py uses csv.DictReader and nothing ever tries to read a value as a date. Line charts then treat dates as evenly spaced labels: each point goes at position 0, 1, 2 and so on with the raw string written underneath, so one day and one month take up the same width, the shape of the line is wrong, and with more than a few rows the labels overlap into an unreadable strip. Scatter charts don't draw at all, because they call float() on the x column and stop with this error:
+
+    Error: Cannot convert value '2026-01-01' in column 'date' to a number
+
+Two smaller things go wrong too. If the rows aren't sorted by date, the line chart keeps file order, so the dates along the bottom come out of sequence and the trend reads wrong. When I tried four rows in the order 2026-03-01, 2026-01-01, 2026-08-01, 2026-01-02, the labels came out in exactly that order, and visitors that grow steadily from 120 to 365 were drawn going down, up, then down again. And in a line chart, a blank or invalid date like "not-a-date" doesn't cause any error, it just gets plotted as another label as if nothing were wrong.
+
+You can see the main problems with this CSV:
+
+    date,visitors
+    2026-01-01,120
+    2026-01-02,135
+    2026-03-01,240
+    2026-08-01,365
+
+    chartroom line dates.csv -x date -y visitors -o line.png
+    chartroom scatter dates.csv -x date -y visitors -o scatter.png
+
+To run the tests:
+
+    pip install -e . --group dev
+    python -m pytest
+
+I went through the repo's issues and pull requests and didn't find a date fix. There are no issues filed, and searching for "date" finds nothing. The 3 open PRs are about axis limits (#8), DuckDB support (#7) and radar charts (#6), and none of them mention dates. The 5 closed PRs are Simon's own early work (first version, alt text, styles) and none touch dates.
+
+What I'm asking for is ISO dates (like 2026-01-01, or 2026-01-01T09:30 with a time) on the x-axis of line and scatter charts, placed by real time so the gaps between points are true to the data, with readable tick labels that don't overlap. It should also plot rows that are out of order in date order, give a clear error that names the bad value when a date cell is blank or invalid, and the automatic alt text should say what date range the chart covers. Grouping by month and handling messy formats like 01/02/2026 are out of scope for this. I expect changes mainly in io.py and charts.py, maybe a small new helper module, plus new tests and a README update. Charts made from non-date data should come out exactly the same as before, and the existing tests should still pass.
+
+Why I want it: most of what I'd want to chart quickly is something over time, like daily counts or monthly totals. When I tried it, the line chart didn't fail, it just quietly drew a misleading picture, with points a day apart and points a month apart sitting the same distance apart. A chart that's wrong but looks fine is worse than an error, so I'd like line and scatter charts to understand dates properly.

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Hertz attempt2",
+  "description": "What a fellow submits after finishing the conversation: the attempt2/ folder at the root of the task repository (its own pull request into main), one plain-text file per field plus meta.txt. The older attempt2.json with this exact shape is still accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_code",
+    "conversation_id",
+    "first_message_changed",
+    "first_message_used",
+    "outcome",
+    "finish_notes"
+  ],
+  "properties": {
+    "task_code": {
+      "type": "string",
+      "pattern": "^HTZ-T[0-9]{3}$"
+    },
+    "conversation_id": {
+      "type": "string",
+      "minLength": 6,
+      "description": "The identifier of the conversation you are submitting, copied from the platform."
+    },
+    "first_message_changed": {
+      "type": "boolean",
+      "description": "true if the first message you actually sent differs from attempt1.json."
+    },
+    "change_reason": {
+      "type": "string",
+      "minLength": 20,
+      "description": "Required when first_message_changed is true: why you changed it."
+    },
+    "first_message_used": {
+      "type": "string",
+      "minLength": 100,
+      "maxLength": 3000,
+      "description": "The first message exactly as sent to the model."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "gave_up"
+      ]
+    },
+    "finish_notes": {
+      "type": "string",
+      "minLength": 100,
+      "description": "What you wrote on Finish: how you checked the result, which files and commands a reviewer should look at; or what works, what does not, and why you stopped."
+    },
+    "flags_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional: how many responses you flagged."
+    }
+  },
+  "if": {
+    "properties": {
+      "first_message_changed": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "change_reason"
+    ]
+  }
+}
